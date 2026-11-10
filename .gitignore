@@ -1,0 +1,22 @@
+# Rust
+/target/
+
+# C builds
+build/
+*.o
+*.a
+*.so
+compile_commands.json
+.clangd/
+
+# key material and vault contents - never commit these
+keys/
+vault/
+*.key
+.env
+
+# editor junk
+.idea/
+.vscode/
+*.swp
+.DS_Store
