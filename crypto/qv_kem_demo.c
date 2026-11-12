@@ -6,6 +6,10 @@
  *
  * in the real engine this shared secret wraps the per-file AES key
  * (hybrid encryption: post-quantum KEM for key agreement, AES for bulk data).
+ *
+ * API notes for this liboqs build (commit f47aaf55):
+ *   OQS_init() returns void; the KEM struct exposes method_name;
+ *   there is no OQS_exit() in this version.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,17 +27,14 @@ static void hexdump(const char *label, const uint8_t *buf, size_t n)
 
 int main(void)
 {
-    if (OQS_init() != OQS_SUCCESS) {
-        fprintf(stderr, "OQS_init failed\n");
-        return 1;
-    }
+    OQS_init();
 
     OQS_KEM *kem = OQS_KEM_new("ML-KEM-768");
     if (kem == NULL) {
         fprintf(stderr, "ML-KEM-768 not enabled in this liboqs build\n");
         return 1;
     }
-    printf("algorithm     : %s\n", kem->name);
+    printf("algorithm     : %s\n", kem->method_name);
     printf("sizes         : pk=%zu  sk=%zu  ct=%zu  ss=%zu\n\n",
            kem->length_public_key, kem->length_secret_key,
            kem->length_ciphertext, kem->length_shared_secret);
@@ -85,6 +86,5 @@ int main(void)
     OQS_MEM_cleanse(ss_dec, kem->length_shared_secret);
     free(pk); free(sk); free(ct); free(ss_enc); free(ss_dec);
     OQS_KEM_free(kem);
-    OQS_exit();
     return 0;
 }
