@@ -44,7 +44,7 @@ static int aes_gcm_encrypt(const uint8_t *key32, const uint8_t *iv12,
 {
     EVP_CIPHER *cipher = NULL;
     EVP_CIPHER_CTX *ctx = NULL;
-    OSSL_PARAM params[2];
+    OSSL_PARAM params[2] = { OSSL_PARAM_END, OSSL_PARAM_END };
     int outlen = 0, finlen = 0;
     uint8_t fin[EVP_MAX_BLOCK_LENGTH];
     int ok = 0;
@@ -65,7 +65,6 @@ static int aes_gcm_encrypt(const uint8_t *key32, const uint8_t *iv12,
 
     params[0] = OSSL_PARAM_construct_octet_string(
         OSSL_CIPHER_PARAM_AEAD_TAG, tag16, 16);
-    params[1] = OSSL_PARAM_END;
     if (!EVP_CIPHER_CTX_get_params(ctx, params)) goto err;
 
     ok = 1;
@@ -85,7 +84,7 @@ static int aes_gcm_decrypt(const uint8_t *key32, const uint8_t *iv12,
 {
     EVP_CIPHER *cipher = NULL;
     EVP_CIPHER_CTX *ctx = NULL;
-    OSSL_PARAM params[2];
+    OSSL_PARAM params[2] = { OSSL_PARAM_END, OSSL_PARAM_END };
     int outlen = 0, finlen = 0, rv;
     uint8_t fin[EVP_MAX_BLOCK_LENGTH];
     int ok = 0;
@@ -104,7 +103,6 @@ static int aes_gcm_decrypt(const uint8_t *key32, const uint8_t *iv12,
 
     params[0] = OSSL_PARAM_construct_octet_string(
         OSSL_CIPHER_PARAM_AEAD_TAG, (void *)tag16, 16);
-    params[1] = OSSL_PARAM_END;
     if (!EVP_CIPHER_CTX_set_params(ctx, params)) goto err;
 
     rv = EVP_DecryptFinal_ex(ctx, fin, &finlen);
