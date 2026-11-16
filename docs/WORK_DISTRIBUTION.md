@@ -15,13 +15,13 @@ computers break RSA/ECC.
 | module | owner | stack | status (nov 15) |
 |---|---|---|---|
 | crypto engine | rafael (member-1) | C, liboqs, openssl | ahead of plan: liboqs built, ML-KEM-768 roundtrip, hybrid AES-GCM with tamper tests, ML-DSA-65 sign/verify all working and committed |
-| virtual filesystem | pending - karthick deciding, deadline nov 15 night | rust + FUSE | not started |
+| virtual filesystem | rafael - provisional, hand-back if karthick engages by nov 20 | rust + FUSE | hello-world FUSE mount this week |
 | key management daemon | sumaya (member-3) | rust | not started (exams; research-notes commits until they end) |
 | CLI interface | sumaya (member-3) | rust | not started |
 
 team note: one member (ingensumit) left the project nov 12; reported to
 infotact with proof. 3 active members cover 4 modules; the filesystem
-module reassigns nov 16 if still unclaimed.
+module provisionally with rafael nov 16, hand-back if karthick re-engages.
 
 ## week plan
 
