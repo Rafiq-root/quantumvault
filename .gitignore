@@ -27,10 +27,3 @@ crypto/qv_hybrid_demo
 crypto/qv_sig_demo
 crypto/qv_contract_test
 crypto/qv_engine_test
-
-# built demo and test binaries
-crypto/qv_kem_demo
-crypto/qv_hybrid_demo
-crypto/qv_sig_demo
-crypto/qv_contract_test
-crypto/qv_engine_test

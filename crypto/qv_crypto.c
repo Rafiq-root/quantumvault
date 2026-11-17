@@ -11,6 +11,10 @@
  *     secret buffers (rust side will use zeroize)
  *   - qv_encrypt generates the IV internally (RAND_bytes) so no caller
  *     can ever reuse a GCM IV with a key
+ *   - every definition below mirrors the header's signatures verbatim,
+ *     array notation included: declaration/definition drift is exactly
+ *     what -Warray-parameter catches. bar: zero warnings under
+ *     -Wall -Wextra, fixed at birth.
  *
  * EVP pattern per openssl's own demos/cipher/aesgcm.c; OSSL_PARAM arrays
  * are declared initialized (OSSL_PARAM_END is a brace initializer and
@@ -51,21 +55,25 @@ void qv_deinit(void)
 
 /* ---- key delivery: ML-KEM-768 ---- */
 
-int qv_kem_keypair(uint8_t *pk, uint8_t *sk)
+int qv_kem_keypair(uint8_t pk[QV_KEM_PK_BYTES],
+                   uint8_t sk[QV_KEM_SK_BYTES])
 {
     if (!g_kem || !pk || !sk) return QV_ERR_PARAM;
     return OQS_KEM_keypair(g_kem, pk, sk) == OQS_SUCCESS ? QV_OK : QV_ERR_CRYPTO;
 }
 
-int qv_file_key_wrap(const uint8_t *pk, uint8_t *kem_ct, uint8_t *file_key)
+int qv_file_key_wrap(const uint8_t pk[QV_KEM_PK_BYTES],
+                     uint8_t kem_ct[QV_KEM_CT_BYTES],
+                     uint8_t file_key[QV_FILE_KEY_BYTES])
 {
     if (!g_kem || !pk || !kem_ct || !file_key) return QV_ERR_PARAM;
     return OQS_KEM_encaps(g_kem, kem_ct, file_key, pk) == OQS_SUCCESS
            ? QV_OK : QV_ERR_CRYPTO;
 }
 
-int qv_file_key_unwrap(const uint8_t *kem_ct, const uint8_t *sk,
-                       uint8_t *file_key)
+int qv_file_key_unwrap(const uint8_t kem_ct[QV_KEM_CT_BYTES],
+                       const uint8_t sk[QV_KEM_SK_BYTES],
+                       uint8_t file_key[QV_FILE_KEY_BYTES])
 {
     if (!g_kem || !kem_ct || !sk || !file_key) return QV_ERR_PARAM;
     return OQS_KEM_decaps(g_kem, file_key, kem_ct, sk) == OQS_SUCCESS
@@ -74,9 +82,11 @@ int qv_file_key_unwrap(const uint8_t *kem_ct, const uint8_t *sk,
 
 /* ---- bulk encryption: AES-256-GCM ---- */
 
-int qv_encrypt(const uint8_t *file_key, const uint8_t *aad, size_t aad_len,
+int qv_encrypt(const uint8_t file_key[QV_FILE_KEY_BYTES],
+               const uint8_t *aad, size_t aad_len,
                const uint8_t *pt, size_t pt_len, uint8_t *ct,
-               uint8_t *iv, uint8_t *tag)
+               uint8_t iv[QV_IV_BYTES],
+               uint8_t tag[QV_TAG_BYTES])
 {
     EVP_CIPHER *cipher = NULL;
     EVP_CIPHER_CTX *ctx = NULL;
@@ -118,10 +128,12 @@ err:
     return ok ? QV_OK : QV_ERR_CRYPTO;
 }
 
-int qv_decrypt(const uint8_t *file_key, const uint8_t *iv,
+int qv_decrypt(const uint8_t file_key[QV_FILE_KEY_BYTES],
+               const uint8_t iv[QV_IV_BYTES],
                const uint8_t *aad, size_t aad_len,
                const uint8_t *ct, size_t ct_len,
-               const uint8_t *tag, uint8_t *pt)
+               const uint8_t tag[QV_TAG_BYTES],
+               uint8_t *pt)
 {
     EVP_CIPHER *cipher = NULL;
     EVP_CIPHER_CTX *ctx = NULL;
@@ -163,13 +175,15 @@ err:
 
 /* ---- file proofs: ML-DSA-65 ---- */
 
-int qv_sig_keypair(uint8_t *pk, uint8_t *sk)
+int qv_sig_keypair(uint8_t pk[QV_SIG_PK_BYTES],
+                   uint8_t sk[QV_SIG_SK_BYTES])
 {
     if (!g_sig || !pk || !sk) return QV_ERR_PARAM;
     return OQS_SIG_keypair(g_sig, pk, sk) == OQS_SUCCESS ? QV_OK : QV_ERR_CRYPTO;
 }
 
-int qv_sign(const uint8_t *msg, size_t msg_len, const uint8_t *sk,
+int qv_sign(const uint8_t *msg, size_t msg_len,
+            const uint8_t sk[QV_SIG_SK_BYTES],
             uint8_t *sig, size_t *sig_len)
 {
     if (!g_sig || (!msg && msg_len) || !sk || !sig || !sig_len)
@@ -178,8 +192,9 @@ int qv_sign(const uint8_t *msg, size_t msg_len, const uint8_t *sk,
            ? QV_OK : QV_ERR_CRYPTO;
 }
 
-int qv_verify(const uint8_t *msg, size_t msg_len, const uint8_t *sig,
-              size_t sig_len, const uint8_t *pk)
+int qv_verify(const uint8_t *msg, size_t msg_len,
+              const uint8_t *sig, size_t sig_len,
+              const uint8_t pk[QV_SIG_PK_BYTES])
 {
     if (!g_sig || (!msg && msg_len) || !sig || !sig_len || !pk)
         return QV_ERR_PARAM;

@@ -42,7 +42,7 @@ int main(void)
     CHECK(qv_file_key_wrap(pk, kem_ct, fk) == QV_OK);
     CHECK(qv_encrypt(fk, kem_ct, QV_KEM_CT_BYTES,
                      (const uint8_t *)msg, msg_len, ct, iv, tag) == QV_OK);
-    CHECK(qv_sign(msg, msg_len, ssk, sig, &sig_len) == QV_OK);
+    CHECK(qv_sign((const uint8_t *)msg, msg_len, ssk, sig, &sig_len) == QV_OK);
     printf("signature   : %zu bytes\n", sig_len);
 
     printf("\n=== read: decrypt, unwrap, verify ===\n");
@@ -52,7 +52,7 @@ int main(void)
     CHECK(memcmp(pt, msg, msg_len) == 0);
     CHECK(qv_file_key_unwrap(kem_ct, sk, fk2) == QV_OK);
     CHECK(memcmp(fk, fk2, QV_FILE_KEY_BYTES) == 0);
-    CHECK(qv_verify(msg, msg_len, sig, sig_len, spk) == QV_OK);
+    CHECK(qv_verify((const uint8_t *)msg, msg_len, sig, sig_len, spk) == QV_OK);
 
     printf("\n=== attacks: every layer must reject ===\n");
     ct[0] ^= 0x01;
@@ -71,7 +71,7 @@ int main(void)
     kem_ct[0] ^= 0x01;
 
     sig[0] ^= 0x01;
-    CHECK(qv_verify(msg, msg_len, sig, sig_len, spk) == QV_ERR_CRYPTO);
+    CHECK(qv_verify((const uint8_t *)msg, msg_len, sig, sig_len, spk) == QV_ERR_CRYPTO);
     sig[0] ^= 0x01;
 
     printf("\n[ok] engine complete: every layer rejects its attack.\n");
